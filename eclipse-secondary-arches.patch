@@ -1,0 +1,122 @@
+diff --git a/eclipse.platform.ui/features/org.eclipse.e4.rcp/feature.xml b/eclipse.platform.ui/features/org.eclipse.e4.rcp/feature.xml
+index 7e1f520..734dd10 100644
+--- a/eclipse.platform.ui/features/org.eclipse.e4.rcp/feature.xml
++++ b/eclipse.platform.ui/features/org.eclipse.e4.rcp/feature.xml
+@@ -393,6 +393,16 @@
+          unpack="false"/>
+ 
+    <plugin
++         id="org.eclipse.equinox.launcher.gtk.linux.s390x"
++         os="linux"
++         ws="gtk"
++         arch="s390x"
++         download-size="0"
++         install-size="0"
++         version="0.0.0"
++         fragment="true"/>
++
++   <plugin
+          id="org.eclipse.equinox.launcher.cocoa.macosx.x86_64"
+          os="macosx"
+          ws="cocoa"
+@@ -480,6 +510,28 @@
+          download-size="0"
+          install-size="0"
+          version="0.0.0"
++         fragment="true"
++         unpack="false"/>
++
++   <plugin
++         id="org.eclipse.swt.gtk.linux.s390x"
++         os="linux"
++         ws="gtk"
++         arch="s390x"
++         download-size="0"
++         install-size="0"
++         version="0.0.0"
++         fragment="true"
++         unpack="false"/>
++
++   <plugin
++         id="org.eclipse.swt.gtk.linux.aarch64"
++         os="linux"
++         ws="gtk"
++         arch="aarch64"
++         download-size="0"
++         install-size="0"
++         version="0.0.0"
+          fragment="true"
+          unpack="false"/>
+ 
+--- a/rt.equinox.framework/features/org.eclipse.equinox.executable.feature/pom.xml	2014-11-28 15:09:42.000000000 +0000
++++ b/rt.equinox.framework/features/org.eclipse.equinox.executable.feature/pom.xml	2014-11-28 16:52:00.315007846 +0000
+@@ -125,6 +125,7 @@
+                         <include name="cocoa/macosx/x86_64/**/*"/>
+                         <include name="gtk/linux/ppc64le/**/*"/>
+                         <include name="gtk/linux/aarch64/**/*"/>
++                        <include name="gtk/linux/s390x/**/*"/>
+                         <include name="gtk/linux/x86_64/**/*"/>
+                         <include name="win32/win32/x86_64/**/*"/>
+                       </fileset>
+--- a/rt.equinox.framework/features/org.eclipse.equinox.executable.feature/build.properties	2015-01-30 14:44:03.436891441 +0000
++++ b/rt.equinox.framework/features/org.eclipse.equinox.executable.feature/build.properties	2015-01-30 14:45:25.232480509 +0000
+@@ -35,3 +35,6 @@
+ 
+ root.linux.gtk.x86_64=bin/gtk/linux/x86_64,gtk_root
+ root.linux.gtk.x86_64.permissions.755=libcairo-swt.so
++
++root.linux.gtk.s390x=bin/gtk/linux/s390x,gtk_root
++root.linux.gtk.s390x.permissions.755=launcher
+--- a/eclipse.platform.swt.binaries/pom.xml	2017-04-05 01:57:59.142576722 +0100
++++ b/eclipse.platform.swt.binaries/pom.xml	2017-04-05 02:00:00.153247342 +0100
+@@ -56,6 +56,7 @@
+     <module>bundles/org.eclipse.swt.cocoa.macosx.x86_64</module>
+     <module>bundles/org.eclipse.swt.gtk.linux.aarch64</module>
+     <module>bundles/org.eclipse.swt.gtk.linux.ppc64le</module>
++    <module>bundles/org.eclipse.swt.gtk.linux.s390x</module>
+     <module>bundles/org.eclipse.swt.gtk.linux.x86_64</module>
+     <module>bundles/org.eclipse.swt.win32.win32.x86_64</module>
+     <module>bundles/org.eclipse.swt.browser.chromium.cocoa.macosx.x86_64</module>
+--- a/eclipse.platform.swt/bundles/org.eclipse.swt/META-INF/p2.inf	2017-04-21 10:15:34.857977599 +0100
++++ b/eclipse.platform.swt/bundles/org.eclipse.swt/META-INF/p2.inf	2017-04-21 10:18:22.878025820 +0100
+@@ -29,3 +29,8 @@
+ requires.6.name = org.eclipse.swt.gtk.linux.aarch64
+ requires.6.range = [$version$,$version$]
+ requires.6.filter = (&(osgi.os=linux)(osgi.ws=gtk)(osgi.arch=aarch64)(!(org.eclipse.swt.buildtime=true)))
++
++requires.7.namespace = org.eclipse.equinox.p2.iu
++requires.7.name = org.eclipse.swt.gtk.linux.s390x
++requires.7.range = [$version$,$version$]
++requires.7.filter = (&(osgi.os=linux)(osgi.ws=gtk)(osgi.arch=s390x)(!(org.eclipse.swt.buildtime=true)))
+--- a/rt.equinox.framework/features/org.eclipse.equinox.executable.feature/library/gtk/build.sh	2017-04-19 13:31:15.000000000 +0100
++++ b/rt.equinox.framework/features/org.eclipse.equinox.executable.feature/library/gtk/build.sh	2017-04-23 16:58:34.022207885 +0100
+@@ -100,7 +100,7 @@
+ 			"s390x")
+ 				defaultOSArch="s390x"
+ 				defaultJava=DEFAULT_JAVA_EXEC
+-				OUTPUT_DIR="$EXEC_DIR/contributed/$defaultWS/$defaultOS/$defaultOSArch"
++				OUTPUT_DIR="$EXEC_DIR/bin/$defaultWS/$defaultOS/$defaultOSArch"
+ 				;;
+             "aarch64")
+ 				defaultOSArch="aarch64"
+--- a/rt.equinox.framework/pom.xml	2017-04-26 22:19:15.548461372 +0100
++++ b/rt.equinox.framework/pom.xml	2017-04-26 22:20:41.348571492 +0100
+@@ -77,6 +77,18 @@
+ 	<module>bundles/org.eclipse.equinox.launcher.gtk.linux.aarch64</module>
+       </modules>
+     </profile>
++    <profile>
++      <id>build-native-launchers-gtk.linux.s390x</id>
++      <activation>
++	<property>
++	  <name>native</name>
++	  <value>gtk.linux.s390x</value>
++        </property>
++      </activation>
++      <modules>
++	<module>bundles/org.eclipse.equinox.launcher.gtk.linux.s390x</module>
++      </modules>
++    </profile>
+   </profiles>
+ 
+   <modules>
