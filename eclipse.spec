@@ -54,7 +54,7 @@ Epoch:                  1
 Summary:        An open, extensible IDE
 Name:           eclipse
 Version:        4.17
-Release:        4%{?dist}
+Release:        4.patched%{?dist}
 License:        EPL-2.0
 URL:            https://www.eclipse.org/
 
@@ -123,6 +123,9 @@ Patch25: eclipse-patch-out-fileupload-dep.patch
 
 # Force a clean on the restart after p2 operations
 Patch26: force-clean-after-p2-operations.patch
+
+# Disable message box asking to restart if zoom has been changed
+Patch27: disable_zoom_changed_message.patch
 
 # Upstream no longer supports non-64bit arches
 ExcludeArch: s390 %{arm} %{ix86}
@@ -374,6 +377,7 @@ rm -rf rt.equinox.binaries/org.eclipse.equinox.executable/{bin,contributed}/
 %patch24 -p1
 %patch25
 %patch26 -p1
+%patch27
 
 # Optional (unused) multipart support (see patch 25)
 rm rt.equinox.bundles/bundles/org.eclipse.equinox.http.servlet/src/org/eclipse/equinox/http/servlet/internal/multipart/MultipartSupport{Impl,FactoryImpl,Part}.java

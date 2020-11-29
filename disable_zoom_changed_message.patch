@@ -1,0 +1,61 @@
+--- eclipse.platform.ui/bundles/org.eclipse.ui.workbench/Eclipse UI/org/eclipse/ui/internal/WorkbenchMessages.java	
++++ eclipse.platform.ui/bundles/org.eclipse.ui.workbench/Eclipse UI/org/eclipse/ui/internal/WorkbenchMessages.java	
+@@ -988,9 +988,5 @@
+ 	// Util
+ 	public static String Util_List;
+ 
+-	// Zoom change messages
+-	public static String Workbench_zoomChangedTitle;
+-	public static String Workbench_zoomChangedMessage;
+-	public static String Workbench_zoomChangedRestart;
+ 
+ }
+--- eclipse.platform.ui/bundles/org.eclipse.ui.workbench/Eclipse UI/org/eclipse/ui/internal/WorkbenchWindow.java	
++++ eclipse.platform.ui/bundles/org.eclipse.ui.workbench/Eclipse UI/org/eclipse/ui/internal/WorkbenchWindow.java	
+@@ -112,7 +112,6 @@
+ import org.eclipse.jface.action.SubContributionItem;
+ import org.eclipse.jface.commands.ActionHandler;
+ import org.eclipse.jface.dialogs.IDialogConstants;
+-import org.eclipse.jface.dialogs.MessageDialog;
+ import org.eclipse.jface.internal.provisional.action.CoolBarManager2;
+ import org.eclipse.jface.internal.provisional.action.ICoolBarManager2;
+ import org.eclipse.jface.internal.provisional.action.IToolBarManager2;
+@@ -938,22 +937,6 @@
+ 
+ 			getShell().setData(this);
+ 			trackShellActivation();
+-			/**
+-			 * When SWT zoom changes for primary monitor, prompt user to restart Eclipse to
+-			 * apply the changes.
+-			 */
+-			getShell().addListener(SWT.ZoomChanged, event -> {
+-				if (getShell().getDisplay().getPrimaryMonitor().equals(getShell().getMonitor())) {
+-					int dialogResponse = MessageDialog.open(MessageDialog.QUESTION, getShell(),
+-							WorkbenchMessages.Workbench_zoomChangedTitle,
+-							WorkbenchMessages.Workbench_zoomChangedMessage, SWT.NONE,
+-							WorkbenchMessages.Workbench_zoomChangedRestart, IDialogConstants.NO_LABEL);
+-					if (event.doit && dialogResponse == 0) {
+-						getWorkbenchImpl().restart(true);
+-					}
+-				}
+-			});
+-
+ 		} finally {
+ 			HandlerServiceImpl.pop();
+ 		}
+--- eclipse.platform.ui/bundles/org.eclipse.ui.workbench/Eclipse UI/org/eclipse/ui/internal/messages.properties	
++++ eclipse.platform.ui/bundles/org.eclipse.ui.workbench/Eclipse UI/org/eclipse/ui/internal/messages.properties	
+@@ -998,8 +998,3 @@
+ # Util
+ # ==============================================================================
+ Util_List={0}, {1}
+-
+-# Zoom change messages
+-Workbench_zoomChangedTitle=Zoom changed
+-Workbench_zoomChangedMessage=Would you like to restart the Eclipse for the zoom changes to take full effect?
+-Workbench_zoomChangedRestart=&Restart Now
+--- /dev/null
++++ eclipse.platform.ui/features/org.eclipse.e4.rcp/target/sources-feature/feature.xml
+@@ -0,0 +1 @@
++<feature id="org.eclipse.e4.rcp.source" version="4.17.0.qualifier"><includes id="org.eclipse.e4.rcp" version="4.17.0.qualifier"/></feature>
+\ No newline at end of file
